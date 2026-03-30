@@ -8,9 +8,11 @@ ToastManager is a lightweight SwiftUI component for displaying toast notificatio
 | --- | --- |
 | `ToastManager.swift` | Observable class managing toast state and auto-dismiss |
 | `ToastData.swift` | Enum defining toast types (success/error) |
-| `ToastableModifier.swift` | ViewModifier rendering toasts with native SwiftUI |
+| `ToastableModifier.swift` | ViewModifier rendering toasts |
 
-**No external dependencies required.** Uses native SwiftUI animations and overlays.
+**Demo Implementation**: This demo uses a simple SwiftUI overlay to avoid external dependencies and keep the example minimal.
+
+**Production Recommendation**: For production apps, consider using a library like [PopupView](https://github.com/exyte/PopupView) to handle proper toast queuing, smoother animations, and edge cases like multiple simultaneous toasts.
 
 ## Core Components
 
@@ -83,7 +85,7 @@ public struct ToastableModifier: ViewModifier {
 }
 ```
 
-Uses native SwiftUI `.overlay()` with smooth spring animations. You must provide custom `ErrorToastView` and `SuccessToastView` matching your design system.
+This demo uses native SwiftUI `.overlay()` with spring animations. You must provide custom `ErrorToastView` and `SuccessToastView` matching your design system.
 
 ## Architecture Pattern
 
@@ -93,6 +95,10 @@ Uses native SwiftUI `.overlay()` with smooth spring animations. You must provide
 
 Business logic determines when to show toasts (API failures, validation errors, success confirmations). ViewModels own business logic, therefore they decide when toasts appear.
 
+### Recommended Setup
+
+**One ToastManager per app**: Create a single instance at the app level and inject it into ViewModels using your preferred dependency injection approach (constructor injection, environment objects, service locators, etc.).
+
 ### Data Flow
 
 ```
@@ -100,7 +106,7 @@ App/Scene creates ToastManager
        ↓
 Root View applies .toastable(with:) modifier
        ↓
-ToastManager passed to ViewModel via init
+ToastManager injected to ViewModels via DI
        ↓
 ViewModel calls showToast() based on business events
        ↓
@@ -199,9 +205,9 @@ struct MyApp: App {
 }
 ```
 
-### Step 4: Inject into ViewModel
+### Step 4: Inject into ViewModels
 
-Pass `ToastManager` via initializer:
+Inject `ToastManager` using your preferred dependency injection approach. This example uses constructor injection:
 
 ```swift
 @MainActor
@@ -220,6 +226,11 @@ final class ContentViewModel: ObservableObject {
     }
 }
 ```
+
+**Alternative DI approaches:**
+- Environment objects: `@EnvironmentObject var toastManager: ToastManager`
+- Service locator pattern
+- Third-party DI frameworks (Swinject, Factory, etc.)
 
 ### Step 5: Trigger Toasts from Business Logic
 
@@ -268,28 +279,18 @@ func performAsyncTask() async {
 
 ### Extending ToastManager
 
-For apps requiring loading indicators or full-screen error dialogs:
+For apps requiring additional UI feedback beyond toasts, subclass `ToastManager`:
 
 ```swift
 @MainActor
 final class AppToastManager: ToastManager {
-    @Published var isLoading = false
     @Published var errorDialogConfig: ErrorConfig?
-
-    func showLoading() {
-        isLoading = true
-    }
-
-    func hideLoading() {
-        isLoading = false
-    }
 
     func showError(
         message: String,
         onRetry: @escaping () -> Void,
         onCancel: @escaping () -> Void
     ) {
-        hideLoading()
         errorDialogConfig = ErrorConfig(
             message: message,
             onRetry: onRetry,
@@ -309,15 +310,44 @@ struct ErrorConfig: Identifiable {
 Update the modifier to handle extended states:
 
 ```swift
-.overlay {
-    if toastManager.isLoading {
-        LoadingOverlay()
-    }
-}
 .sheet(item: $toastManager.errorDialogConfig) { config in
     ErrorDialog(config: config)
 }
 ```
+
+### Loading Overlay Manager
+
+For blocking loading overlays, consider creating a separate `LoadingManager` using a similar pattern:
+
+```swift
+@Observable
+final class LoadingManager {
+    var isLoading = false
+
+    func showLoading() {
+        isLoading = true
+    }
+
+    func hideLoading() {
+        isLoading = false
+    }
+}
+
+struct LoadableModifier: ViewModifier {
+    @Bindable var loadingManager: LoadingManager
+
+    func body(content: Content) -> some View {
+        content
+            .overlay {
+                if loadingManager.isLoading {
+                    LoadingOverlay()
+                }
+            }
+    }
+}
+```
+
+This separates concerns: ToastManager for non-blocking notifications, LoadingManager for blocking operations.
 
 ### Adding Toast Types
 
@@ -379,19 +409,20 @@ func testErrorHandling() async {
 | Component | Responsibility |
 | --- | --- |
 | **App/Scene** | Creates `ToastManager`, applies `.toastable()` modifier at root |
-| **ViewModel** | Receives `ToastManager` via init, calls `showToast()` for business events |
+| **ViewModel** | Receives `ToastManager` via DI, calls `showToast()` for business events |
 | **View** | Displays UI, passes user actions to ViewModel (no toast logic) |
 | **ToastableModifier** | Observes `ToastManager` state, renders toasts automatically |
 
 ## Best Practices
 
-1. **Single ToastManager per flow**: Create one instance per navigation flow or feature module
+1. **Single ToastManager per app**: One instance shared across the entire application
 2. **Apply modifier at root**: Ensure `.toastable()` is on the outermost container so toasts appear above all content
 3. **Keep toasts short**: Aim for 1-2 line messages (long messages can use dialogs instead)
 4. **Use meaningful messages**: "Data loaded" is better than "Success"
 5. **Handle edge cases**: Don't show toasts if user navigates away during async operations
 6. **Test toast triggers**: Verify ViewModels call `showToast()` in expected scenarios
 7. **Consistent visual design**: Use your app's color scheme and typography
+8. **Consider PopupView for production**: Use [PopupView](https://github.com/exyte/PopupView) for better toast queuing and animations
 
 ## Common Patterns
 
@@ -399,9 +430,9 @@ func testErrorHandling() async {
 
 ```swift
 func fetchUserData() {
-    isLoading = true
-
     Task {
+        isLoading = true
+
         defer { isLoading = false }
 
         do {
@@ -448,9 +479,22 @@ If migrating from other toast solutions:
 3. Remove toast-specific view state (e.g., `@State var showToast = false`)
 4. Apply `.toastable()` modifier once at root level
 5. Remove individual toast modifiers from child views
+6. Setup DI to inject `ToastManager` into ViewModels
+
+## Implementation Checklist
+
+- [ ] Copy 3 core files to project (ToastData, ToastManager, ToastableModifier)
+- [ ] Create ErrorToastView and SuccessToastView matching your design
+- [ ] Add View extension with `.toastable()` method
+- [ ] Create ToastManager instance at app level
+- [ ] Apply `.toastable()` modifier to root view
+- [ ] Setup DI to inject ToastManager into ViewModels
+- [ ] Replace existing toast calls with `toastManager.showToast()`
+- [ ] Write tests using MockToastManager
+- [ ] (Optional) Integrate PopupView for production-grade animations
 
 ## See Also
 
-- **README.md**: Project overview and quick start
-- **CLAUDE.md**: Development guidelines for this codebase
-- **Demo app**: Working examples in `ContentView` and `ContentViewModel`
+- Demo project with working implementation
+- Example ViewModels showing common patterns
+- Custom toast view designs
