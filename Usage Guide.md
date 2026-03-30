@@ -10,6 +10,8 @@ ToastManager is a lightweight SwiftUI component for displaying toast notificatio
 | `ToastData.swift` | Enum defining toast types (success/error) |
 | `ToastableModifier.swift` | ViewModifier rendering toasts |
 
+**Demo Project**: [https://github.com/RomanKovalchukDev/toast-manager-demo](https://github.com/RomanKovalchukDev/toast-manager-demo)
+
 **Demo Implementation**: This demo uses a simple SwiftUI overlay to avoid external dependencies and keep the example minimal.
 
 **Production Recommendation**: For production apps, consider using a library like [PopupView](https://github.com/exyte/PopupView) to handle proper toast queuing, smoother animations, and edge cases like multiple simultaneous toasts.
@@ -87,6 +89,10 @@ public struct ToastableModifier: ViewModifier {
 
 This demo uses native SwiftUI `.overlay()` with spring animations. You must provide custom `ErrorToastView` and `SuccessToastView` matching your design system.
 
+### Class Structure
+
+![Class Diagram](docs/diagrams/class-diagram.svg)
+
 ## Architecture Pattern
 
 ### Core Principle
@@ -98,6 +104,12 @@ Business logic determines when to show toasts (API failures, validation errors, 
 ### Recommended Setup
 
 **One ToastManager per app**: Create a single instance at the app level and inject it into ViewModels using your preferred dependency injection approach (constructor injection, environment objects, service locators, etc.).
+
+### Architecture Overview
+
+![Architecture Diagram](docs/diagrams/architecture-diagram.svg)
+
+The diagram shows the complete component structure and relationships between App, View, ViewModel, and ToastManager layers.
 
 ### Data Flow
 
@@ -112,6 +124,12 @@ ViewModel calls showToast() based on business events
        ↓
 ToastableModifier observes state change and renders toast
 ```
+
+### Sequence Flow
+
+![Sequence Diagram](docs/diagrams/sequence-diagram.svg)
+
+The sequence diagram illustrates the complete lifecycle from user interaction through business logic execution, toast display, and automatic dismissal after 2.5 seconds.
 
 ## Implementation Guide
 
@@ -493,8 +511,6 @@ If migrating from other toast solutions:
 - [ ] Write tests using MockToastManager
 - [ ] (Optional) Integrate PopupView for production-grade animations
 
-## See Also
+## Demo Project
 
-- Demo project with working implementation
-- Example ViewModels showing common patterns
-- Custom toast view designs
+Full working implementation with examples: [https://github.com/RomanKovalchukDev/toast-manager-demo](https://github.com/RomanKovalchukDev/toast-manager-demo)

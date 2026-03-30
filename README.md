@@ -52,6 +52,16 @@ The ToastManager follows a clear separation of concerns:
 4. **Business Logic**: ViewModel calls `showToast()` based on events (API failures, validation errors, etc.)
 5. **Automatic Rendering**: `ToastableModifier` observes state changes and displays toasts
 
+### Architecture Diagram
+
+![Architecture Diagram](docs/diagrams/architecture-diagram.svg)
+
+### Class Structure
+
+![Class Diagram](docs/diagrams/class-diagram.svg)
+
+### Example Flow
+
 ```swift
 // App creates ToastManager
 private let toastManager = ToastManager()
@@ -68,6 +78,12 @@ init(toastManager: ToastManager) {
 toastManager.showToast(.success("Operation completed"))
 toastManager.showToast(.error("Something went wrong"))
 ```
+
+### Sequence Flow
+
+![Sequence Diagram](docs/diagrams/sequence-diagram.svg)
+
+The diagram above shows the complete flow from user interaction to toast display and auto-dismissal.
 
 ## Usage Examples
 

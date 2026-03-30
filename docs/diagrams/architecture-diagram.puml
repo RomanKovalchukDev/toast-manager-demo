@@ -1,0 +1,69 @@
+@startuml
+!define RECTANGLE class
+
+skinparam componentStyle rectangle
+
+package "App Layer" {
+  [ToastManagerDemoApp] as App
+}
+
+package "View Layer" {
+  [ContentView] as View
+  [ErrorToastView] as ErrorView
+  [SuccessToastView] as SuccessView
+}
+
+package "ViewModel Layer" {
+  [ContentViewModel] as ViewModel
+}
+
+package "ToastManager Core" {
+  [ToastManager] as Manager
+  [ToastData] as Data
+  [ToastableModifier] as Modifier
+}
+
+package "SwiftUI Framework" {
+  [NavigationStack]
+  [View Protocol]
+}
+
+App --> Manager : creates
+App --> View : instantiates
+App --> ViewModel : injects ToastManager
+App --> NavigationStack : wraps in
+
+View --> ViewModel : observes
+View ..> Modifier : applies .toastable()
+
+ViewModel --> Manager : calls showToast()
+
+Modifier --> Manager : observes state
+Modifier ..> ErrorView : renders on error
+Modifier ..> SuccessView : renders on success
+
+Manager *-- Data : contains
+
+View ..|> [View Protocol]
+ErrorView ..|> [View Protocol]
+SuccessView ..|> [View Protocol]
+
+note right of Manager
+  **@Observable**
+  Single instance per app
+  Auto-dismiss after 2.5s
+end note
+
+note bottom of Modifier
+  Applied at navigation root
+  Observes toast state changes
+  Renders appropriate toast view
+end note
+
+note top of ViewModel
+  Business logic layer
+  Triggers toasts based on events
+  Injected via DI
+end note
+
+@enduml

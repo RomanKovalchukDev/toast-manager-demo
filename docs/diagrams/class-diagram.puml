@@ -1,0 +1,55 @@
+@startuml
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+
+class ToastManager {
+  - toast: ToastData?
+  + showToast(toast: ToastData, autoDismissDelay: TimeInterval)
+}
+
+enum ToastData {
+  success(String)
+  error(String)
+}
+
+class ToastableModifier {
+  - toastManager: ToastManager
+  + body(content: Content): some View
+}
+
+class ErrorToastView {
+  - error: String
+  + body: some View
+}
+
+class SuccessToastView {
+  - message: String
+  + body: some View
+}
+
+class ContentViewModel {
+  - toastManager: ToastManager
+  - counter: Int
+  - isLoading: Bool
+  + showSuccessToast()
+  + showErrorToast()
+  + performAsyncOperation()
+}
+
+ToastManager "1" *-- "0..1" ToastData : manages
+ToastableModifier --> ToastManager : observes
+ToastableModifier ..> ErrorToastView : creates
+ToastableModifier ..> SuccessToastView : creates
+ContentViewModel --> ToastManager : uses
+
+note right of ToastManager
+  @Observable class
+  Auto-dismisses after 2.5s
+end note
+
+note right of ToastData
+  Equatable enum
+  Extensible for warnings, info
+end note
+
+@enduml

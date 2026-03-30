@@ -1,0 +1,56 @@
+@startuml
+actor User
+participant ContentView
+participant ContentViewModel
+participant ToastManager
+participant ToastableModifier
+participant "ErrorToastView\nor\nSuccessToastView" as ToastView
+
+User -> ContentView: Tap button
+activate ContentView
+ContentView -> ContentViewModel: performAction()
+activate ContentViewModel
+
+ContentViewModel -> ContentViewModel: Execute business logic
+ContentViewModel -> ToastManager: showToast(.success("Message"))
+activate ToastManager
+
+ToastManager -> ToastManager: Set toast = .success("Message")
+ToastManager -> ToastManager: Schedule auto-dismiss\n(after 2.5s)
+
+ToastManager --> ContentViewModel:
+deactivate ToastManager
+
+ContentViewModel --> ContentView:
+deactivate ContentViewModel
+deactivate ContentView
+
+ToastableModifier -> ToastManager: Observe toast state change
+activate ToastableModifier
+activate ToastManager
+
+ToastManager --> ToastableModifier: toast = .success("Message")
+deactivate ToastManager
+
+ToastableModifier -> ToastView: Render toast UI
+activate ToastView
+ToastView -> User: Display toast
+deactivate ToastView
+deactivate ToastableModifier
+
+... 2.5 seconds later ...
+
+ToastManager -> ToastManager: Auto-dismiss timer fires
+activate ToastManager
+ToastManager -> ToastManager: Set toast = nil
+ToastManager -> ToastableModifier: Notify state change
+deactivate ToastManager
+
+activate ToastableModifier
+ToastableModifier -> ToastView: Remove from view
+activate ToastView
+ToastView --> User: Toast disappears
+deactivate ToastView
+deactivate ToastableModifier
+
+@enduml
