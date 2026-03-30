@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(xcodebuild -project ToastManagerDemo/ToastManagerDemo.xcodeproj -scheme ToastManagerDemo -destination 'platform=iOS Simulator,name=iPhone 16' clean build)",
-      "Bash(xcodebuild -project ToastManagerDemo/ToastManagerDemo.xcodeproj -scheme ToastManagerDemo -destination 'platform=iOS Simulator,name=iPhone 17' clean build)"
+      "Bash(xcodebuild -project ToastManagerDemo/ToastManagerDemo.xcodeproj -scheme ToastManagerDemo -destination 'platform=iOS Simulator,name=iPhone 17' clean build)",
+      "mcp__plantuml__generate_plantuml_diagram"
     ],
     "deny": [],
     "ask": []

@@ -201,7 +201,7 @@ To integrate ToastManager into your project:
 4. Inject `ToastManager` into your ViewModels via init
 5. Call `showToast()` from ViewModel methods based on business logic
 
-See `ToastManager — Usage Guide.md` for detailed integration instructions.
+See `Usage Guide.md` for detailed integration instructions.
 
 ## Design Principles
 
@@ -215,7 +215,7 @@ See `ToastManager — Usage Guide.md` for detailed integration instructions.
 ## Documentation
 
 - `CLAUDE.md`: Development guidance for working with this codebase
-- `ToastManager — Usage Guide.md`: Comprehensive integration and architecture guide
+- `Usage Guide.md`: Comprehensive integration and architecture guide
 
 ## License
 
