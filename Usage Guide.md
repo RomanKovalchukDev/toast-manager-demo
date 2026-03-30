@@ -509,6 +509,10 @@ If migrating from other toast solutions:
 - [ ] Write tests using MockToastManager
 - [ ] (Optional) Integrate PopupView for production-grade animations
 
+## Credits
+
+This usage guide was co-authored by [Danylo Dyachok](https://github.com/ddyachok).
+
 ## Demo Project
 
 Full working implementation available in this repository with examples in `ContentView` and `ContentViewModel`.
