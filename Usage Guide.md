@@ -10,8 +10,6 @@ ToastManager is a lightweight SwiftUI component for displaying toast notificatio
 | `ToastData.swift` | Enum defining toast types (success/error) |
 | `ToastableModifier.swift` | ViewModifier rendering toasts |
 
-**Demo Project**: [https://github.com/RomanKovalchukDev/toast-manager-demo](https://github.com/RomanKovalchukDev/toast-manager-demo)
-
 **Demo Implementation**: This demo uses a simple SwiftUI overlay to avoid external dependencies and keep the example minimal.
 
 **Production Recommendation**: For production apps, consider using a library like [PopupView](https://github.com/exyte/PopupView) to handle proper toast queuing, smoother animations, and edge cases like multiple simultaneous toasts.
@@ -513,4 +511,4 @@ If migrating from other toast solutions:
 
 ## Demo Project
 
-Full working implementation with examples: [https://github.com/RomanKovalchukDev/toast-manager-demo](https://github.com/RomanKovalchukDev/toast-manager-demo)
+Full working implementation available in this repository with examples in `ContentView` and `ContentViewModel`.
